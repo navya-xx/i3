@@ -10,6 +10,7 @@
 # Please see http://i3wm.org/docs/userguide.html for a complete reference!
 
 set $mod Mod4
+set $mod2 Mod1
 
 # Font for window titles. Will also be used by the bar unless a different font
 # is used in the bar {} block below.
@@ -28,6 +29,9 @@ font pango:DejaVu Sans Mono 8
 
 # Use Mouse+$mod to drag floating windows to their wanted position
 floating_modifier $mod
+
+# New window orientation
+default_orientation vertical
 
 # Xinerama
 # force_xinerama yes
@@ -153,14 +157,35 @@ mode "resize" {
 
 bindsym $mod+r mode "resize"
 
+set $Locker i3lock && sleep 1
+
+set $mode_system System (l) lock, (e) logout, (s) suspend, (h) hibernate, (r) reboot, (Shift+s) shutdown
+mode "$mode_system" {
+    bindsym l exec --no-startup-id $Locker, mode "default"
+    bindsym e exec --no-startup-id i3-msg exit, mode "default"
+    bindsym s exec --no-startup-id $Locker && systemctl suspend, mode "default"
+    bindsym h exec --no-startup-id $Locker && systemctl hibernate, mode "default"
+    bindsym r exec --no-startup-id systemctl reboot, mode "default"
+    bindsym Shift+s exec --no-startup-id systemctl poweroff -i, mode "default"  
+
+    # back to normal: Enter or Escape
+    bindsym Return mode "default"
+    bindsym Escape mode "default"
+}
+    
+bindsym $mod+Pause mode "$mode_system"
+bindsym $mod2+Control+Delete mode "$mode_system"
+
 # Multimedia keys
 # Volume
 bindsym XF86AudioRaiseVolume exec --no-startup-id pactl set-sink-volume 0 +5%
 bindsym XF86AudioLowerVolume exec --no-startup-id pactl set-sink-volume 0 -5%
 bindsym XF86AudioMute exec --no-startup-id pactl set-sink-mute 0 toggle
 # Brightness
-bindsym XF86MonBrightnessUp exec xbacklight -inc 5
-bindsym XF86MonBrightnessDown exec xbacklight -dec 5
+bindsym XF86MonBrightnessUp exec --no-startup-id xbacklight -inc 5
+bindsym XF86MonBrightnessDown exec --no-startup-id xbacklight -dec 5
+# Invert colors
+bindsym $mod+Control+i exec --no-startup-id xcalib -i -a
 
 # Additional settings
 # Jazz radio
@@ -170,20 +195,80 @@ bindsym $mod+Shift+o exec ~/.config/i3/i3-exit
 for_window [class="I3-exit" instance="i3-exit"] floating enable
 # Lock screen with screensaver
 bindsym $mod+Shift+x exec --no-startup-id xscreensaver-command -lock
+# AXRANDR
+bindsym $mod+Control+d exec --no-startup-id arandr
+# Spotify 
+bindsym $mod+Control+p exec --no-startup-id "dbus-send --print-reply --dest=org.mpris.MediaPlayer2.spotify /org/mpris/MediaPlayer2 org.mpris.MediaPlayer2.Player.PlayPause"
+bindsym $mod+Control+Shift+p exec --no-startup-id "dbus-send --print-reply --dest=org.mpris.MediaPlayer2.spotify /org/mpris/MediaPlayer2 org.mpris.MediaPlayer2.Player.Stop" 
+bindsym $mod+Control+n exec --no-startup-id "dbus-send --print-reply --dest=org.mpris.MediaPlayer2.spotify /org/mpris/MediaPlayer2 org.mpris.MediaPlayer2.Player.Next"
+bindsym $mod+Control+Shift+n exec --no-startup-id "dbus-send --print-reply --dest=org.mpris.MediaPlayer2.spotify /org/mpris/MediaPlayer2 org.mpris.MediaPlayer2.Player.Previous"
+# Display setup
+set $mode_display External [L-P (t), L-L (l)], Laptop+Ext [L-P (p)], Laptop [L (m)], Escape [(Esc) or (Enter)]
+mode "$mode_display" {
+	bindsym m exec --no-startup-id "/home/navya/.screenlayout/vert_layout.sh", mode "default"
+	bindsym p exec --no-startup-id "/home/navya/.screenlayout/single_layout.sh", mode "default"
+	bindsym t exec --no-startup-id "/home/navya/.screenlayout/multi_layout_lp.sh", mode "default"
+	bindsym l exec --no-startup-id "/home/navya/.screenlayout/multi_layout_ll.sh", mode "default"
+	bindsym Return mode "default"
+	bindsym Escape mode "default"
+}
+bindsym $mod+Shift+Home mode "$mode_display"
+# bindsym $mod+Control+Shift+1 exec --no-startup-id "/home/navya/.screenlayout/vert_layout.sh"
+# bindsym $mod+Control+Shift+2 exec --no-startup-id "/home/navya/.screenlayout/single_layout.sh"
+
+# Move workspace to other output
+bindsym $mod+Control+l move workspace to output left
+bindsym $mod+Control+r move workspace to output right
 
 # Assignment of clients to specific workspaces
 # Chromium to Workspace 2
 assign [class="Chromium-browser"] 2
+# JabRef
+assign [class="org-jabref-JabRefMain"] 4
+# ThunderBird
+assign [class="Thunderbird"] 3
 # Mplayer to Workspace 5
 assign [class="MPlayer"] 5
+assign [class="vlc"] 5
+# PDF files
+assign [class="okular"] 1
 
-# Automatically start applications at startup
-# Chromium
-exec chromium-browser
+# Startup items on request
+set $primary left
+set $secondary right
+set $startup_system Startup (h) Home, (o) Office, (b) Blank
+set $chromium exec /usr/bin/chromium-browser; move workspace to output $primary
+set $thunderbird exec /usr/bin/thunderbird; move workspace to output $primary
+set $jabref exec /usr/bin/jabref; move workspace to output $primary
+set $main_workspace workspace 1; move workspace to output $secondary
+# set $workspace_pos exec --no-startup-id i3-msg 'focus output $primary; workspace 2; move workspace to output $primary; workspace 3; move workspace to output $primary; workspace 4; move workspace to output $primary; workspace 1; move workspace to output $secondary'
+# set $home exec /usr/bin/chromium-browser
+mode "$startup_system" {
+	# OFFICE
+	bindsym o focus output $primary; $chromium; $thunderbird; $jabref; $main_workspace, mode "default"
+	# HOME
+	bindsym h focus output $primary; $chromium; $main_workspace, mode "default"
+	# Blank
+	bindsym b exec --no-startup-id i3msg 'workspace 1'\
+				mode "default"
+
+    # back to normal: Enter or Escape
+    bindsym Return mode "default"
+    bindsym Escape mode "default"
+
+}
+bindsym $mod+Shift+Return mode "$startup_system"
+
 # Start Xscreensaver
 exec --no-startup-id xscreensaver -no-splash
 # Conky
 exec --no-startup-id conky
+# Davmail server
+exec --no-startup-id davmail
+# Network Manager
+exec --no-startup-id nm-applet
+# Startup display
+exec i3-msg mode "$mode_display"
 
 # Behavior when in fullscreen mode
 popup_during_fullscreen smart
@@ -192,4 +277,5 @@ popup_during_fullscreen smart
 # finds out, if available)
 bar {
         status_command i3status --config ~/.config/i3/i3status.conf
+	font pango:DejaVu Sans Mono, Icons 10
 }
