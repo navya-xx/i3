@@ -51,16 +51,20 @@ bindsym $mod+d exec dmenu_run
 # bindsym $mod+d exec --no-startup-id i3-dmenu-desktop
 
 # change focus
-bindsym $mod+j focus left
-bindsym $mod+k focus down
-bindsym $mod+l focus up
-bindsym $mod+odiaeresis focus right
+#bindsym $mod+j focus left
+#bindsym $mod+k focus down
+#bindsym $mod+l focus up
+#bindsym $mod+odiaeresis focus right
 
 # alternatively, you can use the cursor keys:
-bindsym $mod+Left focus left
-bindsym $mod+Down focus down
-bindsym $mod+Up focus up
-bindsym $mod+Right focus right
+#bindsym $mod+Left focus left
+#bindsym $mod+Down focus down
+#bindsym $mod+Up focus up
+#bindsym $mod+Right focus right
+
+# Focus wrapping
+force_focus_wrapping yes
+bindsym $mod+Tab focus right
 
 # move focused window
 bindsym $mod+Shift+j move left
@@ -205,8 +209,8 @@ bindsym $mod+Control+Shift+n exec --no-startup-id "dbus-send --print-reply --des
 # Display setup
 set $mode_display External [L-P (t), L-L (l)], Laptop+Ext [L-P (p)], Laptop [L (m)], Escape [(Esc) or (Enter)]
 mode "$mode_display" {
-	bindsym m exec --no-startup-id "/home/navya/.screenlayout/vert_layout.sh", mode "default"
-	bindsym p exec --no-startup-id "/home/navya/.screenlayout/single_layout.sh", mode "default"
+	bindsym p exec --no-startup-id "/home/navya/.screenlayout/vert_layout.sh", mode "default"
+	bindsym m exec --no-startup-id "/home/navya/.screenlayout/single_layout.sh", mode "default"
 	bindsym t exec --no-startup-id "/home/navya/.screenlayout/multi_layout_lp.sh", mode "default"
 	bindsym l exec --no-startup-id "/home/navya/.screenlayout/multi_layout_ll.sh", mode "default"
 	bindsym Return mode "default"
@@ -219,6 +223,9 @@ bindsym $mod+Shift+Home mode "$mode_display"
 # Move workspace to other output
 bindsym $mod+Control+l move workspace to output left
 bindsym $mod+Control+r move workspace to output right
+
+# Wallpaper
+bindsym $mod+Control+w exec --no-startup-id nitrogen --random --head=0 --set-auto; exec --no-startup-id nitrogen --random --head=1 --set-auto
 
 # Assignment of clients to specific workspaces
 # Chromium to Workspace 2
@@ -269,6 +276,10 @@ exec --no-startup-id davmail
 exec --no-startup-id nm-applet
 # Startup display
 exec i3-msg mode "$mode_display"
+
+# Wallpaper
+exec --no-startup-id python /home/navya/workspace/tinker/apod_wallaper/update_images.py
+exec --no-startup-id nitrogen --random --head=1 --set-auto
 
 # Behavior when in fullscreen mode
 popup_during_fullscreen smart
